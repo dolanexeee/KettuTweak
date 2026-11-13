@@ -284,11 +284,12 @@ static const void *kKettuBridgelessInjectedKey = &kKettuBridgelessInjectedKey;
     }
     else
     {
-        // KETTU MAX: default bundle is our custom build (6 plugins baked in).
+        // KETTU MINIMAL (max5 diagnostic): default bundle is stock Kettu, no plugins baked in.
+        // MAX bundle remains loadable on demand via Load Custom Bundle (see KETTU-353-FIX.md §10).
         // Stock upstream fallback was:
         // https://codeberg.org/cocobo1/Kettu/raw/branch/dist/kettu.min.js
         bundleUrl = [NSURL
-            URLWithString:@"https://github.com/dolanexeee/Kettu/releases/download/v1.4.2-max/kettu.min.js"];
+            URLWithString:@"https://dolanexeee.github.io/kettu-max/bundle/kettu-stock.min.js"];
         BunnyLog(@"Using default bundle URL: %@", bundleUrl.absoluteString);
     }
 
@@ -532,11 +533,12 @@ static const void *kKettuBridgelessInjectedKey = &kKettuBridgelessInjectedKey;
     }
     else
     {
-        // KETTU MAX: default bundle is our custom build (6 plugins baked in).
+        // KETTU MINIMAL (max5 diagnostic): default bundle is stock Kettu, no plugins baked in.
+        // MAX bundle remains loadable on demand via Load Custom Bundle (see KETTU-353-FIX.md §10).
         // Stock upstream fallback was:
         // https://codeberg.org/cocobo1/Kettu/raw/branch/dist/kettu.min.js
         bundleUrl = [NSURL
-            URLWithString:@"https://github.com/dolanexeee/Kettu/releases/download/v1.4.2-max/kettu.min.js"];
+            URLWithString:@"https://dolanexeee.github.io/kettu-max/bundle/kettu-stock.min.js"];
         BunnyLog(@"Using default bundle URL: %@", bundleUrl.absoluteString);
     }
 

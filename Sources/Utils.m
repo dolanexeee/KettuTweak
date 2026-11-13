@@ -155,11 +155,11 @@ void setCustomBundleURL(NSURL *url, UIViewController *presenter) {
 
 void resetCustomBundleURL(UIViewController *presenter) {
     LoaderConfig *config = [LoaderConfig getLoaderConfig];
-    // KETTU MAX: "reset" returns to the MAX default bundle (enabled), not
+    // KETTU MINIMAL (max5 diagnostic): "reset" returns to the stock minimal default bundle (enabled), not
     // the stock localhost dev-server URL — that URL is unreachable on-device
     // and would leave the settings sheet showing a dead default.
     config.customLoadUrlEnabled = YES;
-    config.customLoadUrl        = [NSURL URLWithString:@"https://github.com/dolanexeee/Kettu/releases/download/v1.4.2-max/kettu.min.js"];
+    config.customLoadUrl        = [NSURL URLWithString:@"https://dolanexeee.github.io/kettu-max/bundle/kettu-stock.min.js"];
     [config saveConfig];
     removeCachedBundle();
     gracefulExit(presenter);

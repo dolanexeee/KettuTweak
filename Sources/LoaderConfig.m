@@ -7,10 +7,10 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
-        // KETTU MAX: default to our custom bundle (6 plugins baked in).
+        // KETTU MINIMAL (max5 diagnostic): default to the stock bundle, no plugins baked in.
         // Stock default was http://localhost:4040/kettu.js (local dev server).
         self.customLoadUrlEnabled = YES;
-        self.customLoadUrl        = [NSURL URLWithString:@"https://github.com/dolanexeee/Kettu/releases/download/v1.4.2-max/kettu.min.js"];
+        self.customLoadUrl        = [NSURL URLWithString:@"https://dolanexeee.github.io/kettu-max/bundle/kettu-stock.min.js"];
     }
     return self;
 }
@@ -52,10 +52,10 @@
 
 + (instancetype)defaultConfig {
     LoaderConfig *config        = [[LoaderConfig alloc] init];
-    // KETTU MAX: default to our custom bundle (6 plugins baked in).
+    // KETTU MINIMAL (max5 diagnostic): default to the stock bundle, no plugins baked in.
     // Stock default was customLoadUrlEnabled = NO + http://localhost:4040/kettu.js.
     config.customLoadUrlEnabled = YES;
-    config.customLoadUrl        = [NSURL URLWithString:@"https://github.com/dolanexeee/Kettu/releases/download/v1.4.2-max/kettu.min.js"];
+    config.customLoadUrl        = [NSURL URLWithString:@"https://dolanexeee.github.io/kettu-max/bundle/kettu-stock.min.js"];
     return config;
 }
 

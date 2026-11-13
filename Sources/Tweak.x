@@ -64,8 +64,11 @@ id                    gBridge        = nil;
     }
     else
     {
+        // KETTU MAX: default bundle is our custom build (6 plugins baked in).
+        // Stock upstream fallback was:
+        // https://codeberg.org/cocobo1/Kettu/raw/branch/dist/kettu.min.js
         bundleUrl = [NSURL
-            URLWithString:@"https://codeberg.org/cocobo1/Kettu/raw/branch/dist/kettu.min.js"];
+            URLWithString:@"https://github.com/dolanexeee/Kettu/releases/download/v1.4.2-max/kettu.min.js"];
         BunnyLog(@"Using default bundle URL: %@", bundleUrl.absoluteString);
     }
 

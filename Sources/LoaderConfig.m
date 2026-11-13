@@ -7,8 +7,10 @@
 - (instancetype)init {
     self = [super init];
     if (self) {
-        self.customLoadUrlEnabled = NO;
-        self.customLoadUrl        = [NSURL URLWithString:@"http://localhost:4040/kettu.js"];
+        // KETTU MAX: default to our custom bundle (6 plugins baked in).
+        // Stock default was http://localhost:4040/kettu.js (local dev server).
+        self.customLoadUrlEnabled = YES;
+        self.customLoadUrl        = [NSURL URLWithString:@"https://github.com/dolanexeee/Kettu/releases/download/v1.4.2-max/kettu.min.js"];
     }
     return self;
 }
@@ -50,8 +52,10 @@
 
 + (instancetype)defaultConfig {
     LoaderConfig *config        = [[LoaderConfig alloc] init];
-    config.customLoadUrlEnabled = NO;
-    config.customLoadUrl        = [NSURL URLWithString:@"http://localhost:4040/kettu.js"];
+    // KETTU MAX: default to our custom bundle (6 plugins baked in).
+    // Stock default was customLoadUrlEnabled = NO + http://localhost:4040/kettu.js.
+    config.customLoadUrlEnabled = YES;
+    config.customLoadUrl        = [NSURL URLWithString:@"https://github.com/dolanexeee/Kettu/releases/download/v1.4.2-max/kettu.min.js"];
     return config;
 }
 

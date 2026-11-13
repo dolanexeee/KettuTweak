@@ -1,6 +1,6 @@
 Package: cocobo1.kettu.tweak
 Name: KettuTweak
-Version: 2.0.7
+Version: 2.0.8
 Architecture: iphoneos-arm
 Description: A tweak to inject Kettu into Discord
 Maintainer: cocobo1

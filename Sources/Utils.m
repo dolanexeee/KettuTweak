@@ -159,7 +159,7 @@ void resetCustomBundleURL(UIViewController *presenter) {
     // the stock localhost dev-server URL — that URL is unreachable on-device
     // and would leave the settings sheet showing a dead default.
     config.customLoadUrlEnabled = YES;
-    config.customLoadUrl        = [NSURL URLWithString:@"https://dolanexeee.github.io/kettu-max/bundle/kettu-notoast-r6.min.js"];
+    config.customLoadUrl        = [NSURL URLWithString:@"https://dolanexeee.github.io/kettu-max/bundle/kettu-notoast-r7.min.js"];
     [config saveConfig];
     removeCachedBundle();
     gracefulExit(presenter);

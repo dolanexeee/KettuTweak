@@ -32,3 +32,5 @@ To resolve the fixable issue, you need to match the app's bundle ID with your pr
 ## Doing this will break notifications if the app is backgrounded or closed
 
 </details>
+
+> Build fork: builds Kettu for the latest Discord from a decrypted IPA (see Releases).

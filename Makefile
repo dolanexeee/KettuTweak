@@ -13,6 +13,9 @@ BUNDLE_NAME = BunnyResources
 
 KettuTweak_FILES = $(wildcard Sources/*.x Sources/*.xm Sources/*.m Sources/*.mm Sources/**/*.x Sources/**/*.xm Sources/**/*.m Sources/**/*.mm)
 KettuTweak_CFLAGS = -fobjc-arc -DPACKAGE_VERSION='@"$(THEOS_PACKAGE_BASE_VERSION)"' -I$(THEOS_PROJECT_DIR)/Headers -I$(THEOS_PROJECT_DIR)/Sources/vendor
+# jsi.h (RN 0.85.3) needs C++17 (e.g. non-const std::string::data()).
+# CCFLAGS applies to C++ sources only (.xm), CFLAGS to all.
+KettuTweak_CCFLAGS = -std=c++17
 KettuTweak_FRAMEWORKS = Foundation UIKit CoreGraphics CoreText CoreFoundation UniformTypeIdentifiers
 
 BunnyResources_INSTALL_PATH = "/Library/Application\ Support/"

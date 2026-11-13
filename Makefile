@@ -11,8 +11,8 @@ include $(THEOS)/makefiles/common.mk
 TWEAK_NAME = KettuTweak
 BUNDLE_NAME = BunnyResources
 
-KettuTweak_FILES = $(wildcard Sources/*.x Sources/*.m Sources/**/*.x Sources/**/*.m)
-KettuTweak_CFLAGS = -fobjc-arc -DPACKAGE_VERSION='@"$(THEOS_PACKAGE_BASE_VERSION)"' -I$(THEOS_PROJECT_DIR)/Headers -I$(THEOS_PROJECT_DIR)/Sources/vendor -stdlib=libc++ -isystem $(shell xcrun --sdk iphoneos --show-sdk-path 2>/dev/null)/usr/include/c++/v1
+KettuTweak_FILES = $(wildcard Sources/*.x Sources/*.xm Sources/*.m Sources/*.mm Sources/**/*.x Sources/**/*.xm Sources/**/*.m Sources/**/*.mm)
+KettuTweak_CFLAGS = -fobjc-arc -DPACKAGE_VERSION='@"$(THEOS_PACKAGE_BASE_VERSION)"' -I$(THEOS_PROJECT_DIR)/Headers -I$(THEOS_PROJECT_DIR)/Sources/vendor
 KettuTweak_FRAMEWORKS = Foundation UIKit CoreGraphics CoreText CoreFoundation UniformTypeIdentifiers
 
 BunnyResources_INSTALL_PATH = "/Library/Application\ Support/"

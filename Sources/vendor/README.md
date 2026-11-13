@@ -29,7 +29,7 @@ runtime via dynamic lookup:
 So the tweak must never construct/destroy a `jsi::Value` or a `jsi::Buffer`
 subclass through the normal C++ API (the compiler would emit calls to those
 out-of-line destructors and the app would crash with "Symbol not found" on
-first injection). `Tweak.x` therefore:
+first injection). `Tweak.xm` therefore:
 
 - calls `evaluateJavaScript` **through the Runtime vtable** (index 3 — see
   below), with a stand-in 16-byte return type whose destructor is a no-op,
@@ -38,7 +38,7 @@ first injection). `Tweak.x` therefore:
   subclass of `jsi::Buffer` — subclassing would pull in `jsi::Buffer`'s
   typeinfo/vtable references) held by a `shared_ptr` with a **no-op deleter**,
   so no `jsi::Buffer` destructor is ever called. The ~282 KB buffer leaks
-  once per launch by design; that is negligible and documented in `Tweak.x`.
+  once per launch by design; that is negligible and documented in `Tweak.xm`.
 
 ## Vtable index of `evaluateJavaScript` (= 3)
 

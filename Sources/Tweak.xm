@@ -94,10 +94,37 @@ typedef KettuEvalResult (*KettuEvalFn)(
     const std::shared_ptr<const facebook::jsi::Buffer> *buffer,
     const std::string *sourceURL);
 
-static void kettuEvalJS(void *runtimePtr, NSData *jsData, NSString *sourceURL)
+// Probe helper (2.0.3): write a small text file into Documents/pyoncord so
+// the on-device result can be read back with WQ Files. BunnyLog only goes
+// to the system log, which we cannot read — files are the only channel.
+static void kettuProbeWrite(NSString *name, NSString *content)
+{
+    NSURL *dir = pyoncordDirectory;
+    if (!dir) {
+        NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+        if (paths.count > 0) {
+            dir = [[NSURL fileURLWithPath:paths[0]] URLByAppendingPathComponent:@"pyoncord"];
+        }
+    }
+    if (!dir) {
+        return;
+    }
+    [[NSFileManager defaultManager] createDirectoryAtURL:dir
+                              withIntermediateDirectories:YES
+                                               attributes:nil
+                                                    error:nil];
+    NSURL *url = [dir URLByAppendingPathComponent:name];
+    [content writeToURL:url atomically:YES encoding:NSUTF8StringEncoding error:nil];
+}
+
+// Returns @"ok" on success, or a short failure reason (@"null-input",
+// @"null-vtable", @"null-eval-slot", @"exception: <what>",
+// @"unknown-exception"). Callers ignore the return value except the 2.0.3
+// probe gate, which writes it to eval-result.txt.
+static NSString *kettuEvalJS(void *runtimePtr, NSData *jsData, NSString *sourceURL)
 {
     if (!runtimePtr || !jsData || jsData.length == 0) {
-        return;
+        return @"null-input";
     }
 
     std::string js((const char *)jsData.bytes, (size_t)jsData.length);
@@ -115,13 +142,13 @@ static void kettuEvalJS(void *runtimePtr, NSData *jsData, NSString *sourceURL)
     void **vtable = *reinterpret_cast<void ***>(runtimePtr);
     if (!vtable) {
         BunnyLog(@"Kettu bridgeless eval: null runtime vtable");
-        return;
+        return @"null-vtable";
     }
 
     auto evalFn = reinterpret_cast<KettuEvalFn>(vtable[KETTU_EVAL_VTABLE_INDEX]);
     if (!evalFn) {
         BunnyLog(@"Kettu bridgeless eval: null evaluateJavaScript slot");
-        return;
+        return @"null-eval-slot";
     }
 
     // C++ exceptions (e.g. a JS error surfacing as jsi::JSError, which is a
@@ -134,10 +161,13 @@ static void kettuEvalJS(void *runtimePtr, NSData *jsData, NSString *sourceURL)
         // it are simply left alone (never destroyed, never interpreted).
         KettuEvalResult result = evalFn(runtimePtr, &shared, &url);
         (void)result;
+        return @"ok";
     } catch (const std::exception &e) {
         BunnyLog(@"Kettu bridgeless eval failed (%@): %s", sourceURL, e.what());
+        return [NSString stringWithFormat:@"exception: %s", e.what()];
     } catch (...) {
         BunnyLog(@"Kettu bridgeless eval failed (%@): unknown C++ exception", sourceURL);
+        return @"unknown-exception";
     }
 }
 
@@ -154,6 +184,36 @@ static const void *kKettuBridgelessInjectedKey = &kKettuBridgelessInjectedKey;
     // Let Discord's own runtime-delegate setup run first.
     %orig;
 
+    // 2.0.3 PROBE: write marker files into Documents/pyoncord so the
+    // on-device result is readable with WQ Files (BunnyLog is not).
+    // The files present after a crash tell us exactly how far the hook got:
+    //   bridgeless-hook-entered.txt -> hook attached and fired
+    //   vtable-slots.txt            -> runtime vtable read (slots 0-7)
+    //   eval-result.txt             -> trivial eval (1+1) outcome
+    //   probe-ok.txt                -> trivial eval passed, full injection started
+    //   bridgeless-injected.txt     -> full injection finished
+    kettuProbeWrite(@"bridgeless-hook-entered.txt",
+                    [NSString stringWithFormat:@"hook fired\ninstance=%p runtime=%p\n",
+                                               instance, (void *)&runtime]);
+
+    void *runtimePtr = (void *)&runtime;
+
+    // Dump the runtime vtable slots WITHOUT calling anything: if slot 3 is
+    // not evaluateJavaScript, the pointer values here let us re-derive the
+    // right index from the binary instead of guessing.
+    void **runtimeVtable = runtimePtr ? *(void ***)runtimePtr : NULL;
+    if (runtimeVtable) {
+        NSMutableString *slots = [NSMutableString
+            stringWithFormat:@"runtime=%p vtable=%p\n", runtimePtr, runtimeVtable];
+        for (int i = 0; i < 8; i++) {
+            [slots appendFormat:@"slot[%d]=%p\n", i, runtimeVtable[i]];
+        }
+        kettuProbeWrite(@"vtable-slots.txt", slots);
+    } else {
+        kettuProbeWrite(@"vtable-slots.txt", @"null vtable\n");
+        return;
+    }
+
     // This fires on the JS thread, before the main bundle loads — the same
     // ordering the old RCTCxxBridge hook had on the bridge.
     if (objc_getAssociatedObject(instance, kKettuBridgelessInjectedKey)) {
@@ -161,7 +221,23 @@ static const void *kKettuBridgelessInjectedKey = &kKettuBridgelessInjectedKey;
         return;
     }
 
-    void *runtimePtr = (void *)&runtime;
+    // PROBE GATE: try a trivial script first. If the vtable call itself is
+    // broken (wrong index / wrong calling convention), the app dies here and
+    // eval-result.txt is never written — that alone is the diagnosis. If it
+    // throws (caught), skip the real injection and leave the app alive.
+    NSString *probeStatus = kettuEvalJS(runtimePtr,
+                                        [@"1+1" dataUsingEncoding:NSUTF8StringEncoding],
+                                        @"kettu-probe");
+    kettuProbeWrite(@"eval-result.txt",
+                    [NSString stringWithFormat:@"trivial eval (1+1): %@\n",
+                                               probeStatus ?: @"(nil)"]);
+    if (![probeStatus isEqualToString:@"ok"]) {
+        BunnyLog(@"Kettu probe: trivial eval failed (%@), skipping injection", probeStatus);
+        return;
+    }
+    kettuProbeWrite(@"probe-ok.txt",
+                    @"trivial eval succeeded; proceeding to full injection\n");
+
 
     NSBundle *bunnyPatchesBundle = [NSBundle bundleWithPath:bunnyPatchesBundlePath];
     if (!bunnyPatchesBundle)
@@ -394,6 +470,7 @@ static const void *kKettuBridgelessInjectedKey = &kKettuBridgelessInjectedKey;
     objc_setAssociatedObject(instance, kKettuBridgelessInjectedKey, @YES,
                              OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     BunnyLog(@"Kettu bridgeless injection complete");
+    kettuProbeWrite(@"bridgeless-injected.txt", @"full injection complete\n");
 }
 
 %end

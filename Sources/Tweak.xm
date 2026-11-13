@@ -19,7 +19,9 @@ static NSURL         *pyoncordDirectory;
 static LoaderConfig  *loaderConfig;
 static NSTimeInterval shakeStartTime = 0;
 static BOOL           isShaking      = NO;
-id                    gBridge        = nil;
+// Defined with C linkage: Settings.h declares it inside extern "C" so the
+// ObjC sources (Settings.m, Utils.m) link against the plain _gBridge symbol.
+extern "C" id gBridge = nil;
 
 #pragma mark - Bridgeless JS evaluation (Discord 353 / RN 0.85.3)
 //

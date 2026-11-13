@@ -289,7 +289,7 @@ static const void *kKettuBridgelessInjectedKey = &kKettuBridgelessInjectedKey;
         // Stock upstream fallback was:
         // https://codeberg.org/cocobo1/Kettu/raw/branch/dist/kettu.min.js
         bundleUrl = [NSURL
-            URLWithString:@"https://dolanexeee.github.io/kettu-max/bundle/kettu-stock.min.js"];
+            URLWithString:@"https://dolanexeee.github.io/kettu-max/bundle/kettu-notoast.min.js"];
         BunnyLog(@"Using default bundle URL: %@", bundleUrl.absoluteString);
     }
 
@@ -538,7 +538,7 @@ static const void *kKettuBridgelessInjectedKey = &kKettuBridgelessInjectedKey;
         // Stock upstream fallback was:
         // https://codeberg.org/cocobo1/Kettu/raw/branch/dist/kettu.min.js
         bundleUrl = [NSURL
-            URLWithString:@"https://dolanexeee.github.io/kettu-max/bundle/kettu-stock.min.js"];
+            URLWithString:@"https://dolanexeee.github.io/kettu-max/bundle/kettu-notoast.min.js"];
         BunnyLog(@"Using default bundle URL: %@", bundleUrl.absoluteString);
     }
 

@@ -10,7 +10,7 @@
         // KETTU MINIMAL (max5 diagnostic): default to the stock bundle, no plugins baked in.
         // Stock default was http://localhost:4040/kettu.js (local dev server).
         self.customLoadUrlEnabled = YES;
-        self.customLoadUrl        = [NSURL URLWithString:@"https://dolanexeee.github.io/kettu-max/bundle/kettu-stock.min.js"];
+        self.customLoadUrl        = [NSURL URLWithString:@"https://dolanexeee.github.io/kettu-max/bundle/kettu-notoast.min.js"];
     }
     return self;
 }
@@ -55,7 +55,7 @@
     // KETTU MINIMAL (max5 diagnostic): default to the stock bundle, no plugins baked in.
     // Stock default was customLoadUrlEnabled = NO + http://localhost:4040/kettu.js.
     config.customLoadUrlEnabled = YES;
-    config.customLoadUrl        = [NSURL URLWithString:@"https://dolanexeee.github.io/kettu-max/bundle/kettu-stock.min.js"];
+    config.customLoadUrl        = [NSURL URLWithString:@"https://dolanexeee.github.io/kettu-max/bundle/kettu-notoast.min.js"];
     return config;
 }
 

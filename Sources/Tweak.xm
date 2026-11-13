@@ -84,10 +84,19 @@ private:
     std::string s_;
 };
 
-// evaluateJavaScript vtable slot (RN 0.85.3 jsi::Runtime).
-// [0]=ICast::castInterface, [1]=~Runtime D1, [2]=~Runtime D0,
-// [3]=evaluateJavaScript.
-#define KETTU_EVAL_VTABLE_INDEX 3
+// evaluateJavaScript vtable slot — INDEX 1 (corrected 2026-11-13, round 3).
+// The vendored RN 0.85.3 jsi.h says [0]=castInterface, [1]=~D1, [2]=~D0,
+// [3]=evaluateJavaScript — but the SHIPPED hermesvm was built against the
+// newer RN-main jsi hierarchy (Runtime : IRuntime : ICast, destructors
+// last). Verified from the binary itself (hermesvm __ZTVN...HermesRuntimeImplE
+// @ 0x1fcce0, vptr +16): [0]=castInterface, [1]=evaluateJavaScript,
+// [2]=prepareJavaScript, [3]=evaluatePreparedJavaScript, destructors at
+// [109]/[110]. Slot 3 was evaluatePreparedJavaScript — calling it with a
+// Buffer shared_ptr made it treat our 32-byte KettuBuffer as a
+// PreparedJavaScript (OOB read at +0x38 + atomic refcount RMW on garbage),
+// which is the 2.0.2 launch crash. NEVER trust the vendored header's layout
+// again without checking the shipped binary.
+#define KETTU_EVAL_VTABLE_INDEX 1
 
 typedef KettuEvalResult (*KettuEvalFn)(
     void *runtime,

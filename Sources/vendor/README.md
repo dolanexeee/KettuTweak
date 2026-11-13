@@ -40,7 +40,29 @@ first injection). `Tweak.xm` therefore:
   so no `jsi::Buffer` destructor is ever called. The ~282 KB buffer leaks
   once per launch by design; that is negligible and documented in `Tweak.xm`.
 
-## Vtable index of `evaluateJavaScript` (= 3)
+## Vtable index of `evaluateJavaScript` (= 1, corrected 2026-11-13)
+
+**WARNING: the vendored 0.85.3 header's layout does NOT match the shipped
+binary.** `g++ -fdump-lang-class` on this header gives `[0] castInterface,
+[1] ~D1, [2] ~D0, [3] evaluateJavaScript` (92 entries) — correct *for the
+header*, but the shipped `hermesvm` was built against the newer RN-main jsi
+hierarchy (`Runtime : IRuntime : ICast`, destructors declared last).
+Verified from the binary itself (`__ZTVN...HermesRuntimeImplE` @ `0x1fcce0`,
+vptr +16, entries dyld chained-fixup decoded):
+
+```
+[0] castInterface            [1] evaluateJavaScript  <- this one
+[2] prepareJavaScript        [3] evaluatePreparedJavaScript
+[4] queueMicrotask ...       [109] ~D1  [110] ~D0
+```
+
+Slot 3 is `evaluatePreparedJavaScript` — 2.0.2 called it with a Buffer
+shared_ptr, which made it treat our 32-byte `KettuBuffer` as a
+`PreparedJavaScript` (OOB read at +0x38 + atomic refcount RMW on garbage):
+the 2.0.2 launch crash. **Re-derive from the shipped binary before ever
+changing the index again; do not trust the header alone.**
+
+Original (wrong) derivation, kept for the record:
 
 Derived from `jsi.h` (RN 0.85.3) with `g++ -fdump-lang-class` on Linux
 (Itanium ABI vtable layout is identical on arm64):
